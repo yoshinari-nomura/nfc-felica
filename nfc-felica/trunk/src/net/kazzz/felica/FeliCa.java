@@ -11,8 +11,14 @@
  */
 package net.kazzz.felica;
 
-import static net.kazzz.felica.lib.FeliCaLib.*;
+import static net.kazzz.felica.lib.FeliCaLib.COMMAND_POLLING;
+import static net.kazzz.felica.lib.FeliCaLib.COMMAND_READ_WO_ENCRYPTION;
+import static net.kazzz.felica.lib.FeliCaLib.COMMAND_WRITE_WO_ENCRYPTION;
+
+import java.nio.ByteBuffer;
+
 import net.kazzz.felica.command.PollingResponse;
+import net.kazzz.felica.command.ReadResponse;
 import net.kazzz.felica.lib.FeliCaLib;
 import net.kazzz.felica.lib.FeliCaLib.CommandPacket;
 import net.kazzz.felica.lib.FeliCaLib.CommandResponse;
@@ -38,6 +44,19 @@ public class FeliCa implements IFeriCa {
     public static final int SYSTEMCODE_SUICA = 0x0003;     // Suica (=サイバネ領域)
     public static final int SYSTEMCODE_PASMO = 0x0003;     // Pasmo (=サイバネ領域)
     
+    // サービスコード suica/pasmo (little endian)
+    public static final int SERVICE_SUICA_INOUT = 0x108f;   // SUICA/PASMO 入退場記録
+    public static final int SERVICE_SUICA_HISTORY = 0x090f; // SUICA/PASMO履歴
+    
+    public static final int STATUSFLAG1_NORMAL = 0x00; //正常終了 
+    public static final int STATUSFLAG1_ERROR = 0xff;  //エラー　(ブロック番号に依らない)
+
+    public static final int STATUSFLAG2_NORMAL = 0x00;          //正常終了
+    public static final int STATUSFLAG2_ERROR_LENGTH    = 0x01; 
+    public static final int STATUSFLAG2_ERROR_FLOWN     = 0x02; 
+    public static final int STATUSFLAG2_ERROR_MEMORY    = 0x70; 
+    public static final int STATUSFLAG2_ERROR_WRITELIMIT= 0x71; 
+
     protected final Parcelable tagService;
     protected IDm idm;
     protected PMm pmm;
@@ -60,8 +79,8 @@ public class FeliCa implements IFeriCa {
         CommandPacket polling = 
             new CommandPacket(COMMAND_POLLING
                     , new byte[] {
-                      (byte) (systemCode & 0xff) // システムコード
-                    , (byte) (systemCode >> 8)
+                      (byte) (systemCode >> 8)  // システムコード
+                    , (byte) (systemCode & 0xff)
                     , (byte) 0x01              //　システムコードリクエスト
                     , (byte) 0x00});           // タイムスロット}; 
         CommandResponse r = FeliCaLib.execute(this.tagService, polling);
@@ -92,17 +111,25 @@ public class FeliCa implements IFeriCa {
         if ( this.tagService == null ) {
             throw new FeliCaException("tagService is null. no read execution");
         }
-        // search read without encryption (利用履歴)
+        // read without encryption
         CommandPacket readWoEncrypt = 
             new CommandPacket(COMMAND_READ_WO_ENCRYPTION, idm
                 ,  new byte[]{(byte) 0x01         // サービス数
                     , (byte) (serviceCode & 0xff) // サービスコード (little endian)
                     , (byte) (serviceCode >> 8)
                     , (byte) 0x01                 // 同時読み込みブロック数
-                    , (byte) 0x80, (byte) 0x00, (byte) 0x00 });// ブロックリスト
+                    , (byte) 0x80, addr });       // ブロックリスト
         CommandResponse r = FeliCaLib.execute(this.tagService, readWoEncrypt);
-        return r.getBytes();
-   }
+        ReadResponse rr = new ReadResponse(r); 
+        
+        if ( rr.getStatusFlag1() == 0 ) {
+            return rr.getBlockData();
+        } else {
+            return null; //error
+        }
+    }
+    
+    
     /* (non-Javadoc)
      * @see net.kazzz.felica.IFeriCa#writeWWithoutEncryption(short, byte, byte[])
      */
@@ -112,14 +139,18 @@ public class FeliCa implements IFeriCa {
         if ( this.tagService == null ) {
             throw new FeliCaException("tagService is null. no read execution");
         }
-        // search read without encryption (利用履歴)
+        // write without encryption
+        ByteBuffer b =  ByteBuffer.allocate(6 + buff.length);
+        b.put(new byte[]{(byte) 0x01          // Number of Service
+                , (byte) (serviceCode & 0xff) // サービスコード (little endian)
+                , (byte) (serviceCode >> 8)
+                , (byte) buff.length          // 同時書き込みブロック数
+                , (byte) 0x80, (byte) addr    // ブロックリスト
+                });
+        b.put(buff); //書き出すデータ
+        
         CommandPacket writeWoEncrypt = 
-            new CommandPacket(COMMAND_WRITE_WO_ENCRYPTION, idm
-                , new byte[]{(byte) 0x01          // Number of Service
-                    , (byte) (serviceCode & 0xff) // サービスコード (little endian)
-                    , (byte) (serviceCode >> 8)
-                    , (byte) buff.length          // 同時書き込みブロック数
-                    , (byte) 0x80, (byte) 0x00, (byte) 0x00 });// ブロックリスト
+            new CommandPacket(COMMAND_WRITE_WO_ENCRYPTION, idm, b.array());
         CommandResponse r = FeliCaLib.execute(this.tagService, writeWoEncrypt);
         return r.getBytes()[9] == 0 ? 0 : -1;
     }

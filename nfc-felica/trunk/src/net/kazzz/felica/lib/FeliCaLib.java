@@ -47,10 +47,6 @@ import android.util.Log;
 public class FeliCaLib {
     static final String TAG = "FeliCaLib";
     
-    //serive code for suica/pasmo (little endian)
-    public static final byte[] SERVICE_SUICA_INOUT = new byte[]{(byte) 0x8f, (byte) 0x10 }; // SUICA/PASMO 入退場記録
-    public static final byte[] SERVICE_SUICA_HISTORY = new byte[]{(byte) 0x0f, (byte) 0x09}; // SUICA/PASMO履歴
-    
     //polling
     public static final byte COMMAND_POLLING = 0x00;
     public static final byte RESPONSE_POLLING = 0x01;
@@ -678,12 +674,12 @@ public class FeliCaLib {
             //INfcTag#transceive
             Method transeive = tagService.getClass().getMethod("transceive", Integer.TYPE, byte[].class);
 
-            Log.d(TAG, "invoking transceive commandPacket :" +  getHexString(commandPacket) + "\n");
+            //Log.d(TAG, "invoking transceive commandPacket :" +  getHexString(commandPacket) + "\n");
             byte[] response = (byte[])transeive.invoke(tagService, serviceHandle, commandPacket);
             if ( response != null ) {
-                Log.i(TAG, "transceive successful. commandResponse = " + getHexString(response) + "\n");
+                //Log.d(TAG, "transceive successful. commandResponse = " + getHexString(response) + "\n");
             } else {
-                Log.i(TAG, "transceive fail. result null");
+                Log.d(TAG, "transceive fail. result null");
                 throw new FeliCaException("execute transceive fail" + "\n");
             }
             return response;

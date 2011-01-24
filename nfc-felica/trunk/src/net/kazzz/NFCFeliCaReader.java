@@ -16,6 +16,8 @@ import static net.kazzz.felica.lib.FeliCaLib.COMMAND_READ_WO_ENCRYPTION;
 import static net.kazzz.felica.lib.FeliCaLib.COMMAND_REQUEST_SERVICE;
 import static net.kazzz.felica.lib.FeliCaLib.COMMAND_REQUEST_SYSTEMCODE;
 import static net.kazzz.felica.lib.FeliCaLib.COMMAND_SEARCH_SERVICECODE;
+import net.kazzz.felica.FeliCa;
+import net.kazzz.felica.FeliCaException;
 import net.kazzz.felica.command.PollingResponse;
 import net.kazzz.felica.lib.FeliCaLib;
 import net.kazzz.felica.lib.FeliCaLib.CommandPacket;
@@ -73,8 +75,8 @@ public class NFCFeliCaReader extends Activity implements OnClickListener {
         
         
         ((Button) findViewById(R.id.btn_read)).setOnClickListener(this);
-        //((Button) findViewById(R.id.brn_hitory)).setOnClickListener(this);
-        //((Button) findViewById(R.id.btn_inout)).setOnClickListener(this);
+        ((Button) findViewById(R.id.brn_hitory)).setOnClickListener(this);
+        ((Button) findViewById(R.id.btn_inout)).setOnClickListener(this);
     }
 
    
@@ -123,14 +125,22 @@ public class NFCFeliCaReader extends Activity implements OnClickListener {
      * @return
      */
     protected String readHistoryData() throws Exception {
-        //try {
-            StringBuilder sb = new StringBuilder();
-            return sb.toString();
-        //} catch (FeliCaCommandException e) {
-        //    e.printStackTrace();
-        //    Log.e(TAG, "readHistoryData", e);
-        //    throw e;
-        //}
+        try {
+            FeliCa f = new FeliCa(this.nfcTag);
+            
+            //polling は IDm、PMmを取得するのに必要
+            f.polling(FeliCa.SYSTEMCODE_PASMO);
+            //read
+            byte[] result = f.readWithoutEncryption(FeliCa.SERVICE_SUICA_HISTORY, (byte)0);
+            
+            String str = FeliCaLib.getHexString(result);
+            Log.d(TAG, "FeliCa#readWithoutEncryption = " + str);
+            return str;
+        } catch (FeliCaException e) {
+            e.printStackTrace();
+            Log.e(TAG, "readHistoryData", e);
+            throw e;
+        }
     }
 
 
