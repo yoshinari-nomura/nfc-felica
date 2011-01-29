@@ -137,7 +137,7 @@ public class FeliCa implements IFeriCa {
     public int writeWithoutEncryption(int serviceCode,
             byte addr, byte[] buff) throws FeliCaException {
         if ( this.tagService == null ) {
-            throw new FeliCaException("tagService is null. no read execution");
+            throw new FeliCaException("tagService is null. no write execution");
         }
         // write without encryption
         ByteBuffer b =  ByteBuffer.allocate(6 + buff.length);

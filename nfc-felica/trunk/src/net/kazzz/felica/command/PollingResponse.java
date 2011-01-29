@@ -16,6 +16,7 @@ import java.util.Arrays;
 import net.kazzz.felica.lib.FeliCaLib;
 import net.kazzz.felica.lib.FeliCaLib.CommandResponse;
 import net.kazzz.felica.lib.FeliCaLib.PMm;
+import net.kazzz.felica.lib.Util;
 
 /**
  * Pollingコマンドのレスポンスを抽象化したクラスを提供します
@@ -55,13 +56,13 @@ public class PollingResponse extends CommandResponse {
         StringBuilder sb = new StringBuilder();
         sb.append("FeliCa レスポンス　パケット \n");
         sb.append(" コマンド名 :" + FeliCaLib.commandMap.get(this.responseCode)  +  "\n");
-        sb.append(" データ長 : " + FeliCaLib.getHexString(this.length) + "\n");
-        sb.append(" コマンドコード : " + FeliCaLib.getHexString(this.responseCode) +  "\n");
+        sb.append(" データ長 : " + Util.getHexString(this.length) + "\n");
+        sb.append(" コマンドコード : " + Util.getHexString(this.responseCode) +  "\n");
         if ( this.idm != null )
             sb.append(" " + this.idm.toString() + "\n");
         if ( this.pmm != null )
             sb.append(" " + this.pmm.toString() + "\n");
-        sb.append(" データ: " + FeliCaLib.getHexString(this.data) + "\n");
+        sb.append(" データ: " + Util.getHexString(this.data) + "\n");
         return sb.toString();
     }
 }

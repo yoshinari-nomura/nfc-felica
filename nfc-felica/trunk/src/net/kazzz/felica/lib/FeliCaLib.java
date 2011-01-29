@@ -229,11 +229,11 @@ public class FeliCaLib {
            StringBuilder sb = new StringBuilder();
            sb.append("FeliCa コマンドパケット \n");
            sb.append(" コマンド名:" + commandMap.get(this.commandCode)  +  "\n");
-           sb.append(" データ長: " + getHexString(this.length) + "\n");
-           sb.append(" コマンドコード : " + getHexString(this.commandCode) +  "\n");
+           sb.append(" データ長: " + Util.getHexString(this.length) + "\n");
+           sb.append(" コマンドコード : " + Util.getHexString(this.commandCode) +  "\n");
            if ( this.idm != null )
                sb.append(" " + this.idm.toString() + "\n");
-           sb.append(" データ: " + getHexString(this.data) + "\n");
+           sb.append(" データ: " + Util.getHexString(this.data) + "\n");
            return sb.toString();
         }
 
@@ -293,10 +293,10 @@ public class FeliCaLib {
            sb.append(" \n\n");
            sb.append("FeliCa レスポンスパケット \n");
            sb.append(" コマンド名:" + commandMap.get(this.responseCode)  +  "\n");
-           sb.append(" データ長: " + getHexString(this.length) + "\n");
-           sb.append(" レスポンスコード: " + getHexString(this.responseCode) + "\n");
+           sb.append(" データ長: " + Util.getHexString(this.length) + "\n");
+           sb.append(" レスポンスコード: " + Util.getHexString(this.responseCode) + "\n");
            sb.append(" "+ this.idm.toString() + "\n");
-           sb.append(" データ: " + getHexString(this.data) + "\n");
+           sb.append(" データ: " + Util.getHexString(this.data) + "\n");
            return sb.toString();
         }      
     }
@@ -338,12 +338,12 @@ public class FeliCaLib {
         @Override
         public String toString() {
             StringBuilder sb = new StringBuilder();
-            sb.append("IDm (8byte) : " + getHexString(this.getBytes()) + "\n");
-            sb.append(" 製造者コード: " + getHexString(this.manufactureCode) + "\n");
+            sb.append("IDm (8byte) : " + Util.getHexString(this.getBytes()) + "\n");
+            sb.append(" 製造者コード: " + Util.getHexString(this.manufactureCode) + "\n");
             sb.append(" カード識別番号:\n");
-            sb.append("   製造器:" + getHexString(this.cardIdentification, 0, 2) + "\n");
-            sb.append("   日付:" + getHexString(this.cardIdentification, 2, 2) + "\n");
-            sb.append("   シリアル:" + getHexString(this.cardIdentification, 4, 2) + "\n");
+            sb.append("   製造器:" + Util.getHexString(this.cardIdentification, 0, 2) + "\n");
+            sb.append("   日付:" + Util.getHexString(this.cardIdentification, 2, 2) + "\n");
+            sb.append("   シリアル:" + Util.getHexString(this.cardIdentification, 4, 2) + "\n");
             return sb.toString();
         }
 
@@ -386,17 +386,17 @@ public class FeliCaLib {
         public String toString() {
             StringBuilder sb = new StringBuilder();
             sb.append("PMm(製造パラメータ)\n");
-            sb.append(" ICコード(2byte): " + getHexString(this.icCode) + "\n");
-            sb.append("   ROM種別: " + getHexString(this.icCode, 0, 1) + "\n");
-            sb.append("   IC 種別: " + getHexString(this.icCode, 1, 1) + "\n");
+            sb.append(" ICコード(2byte): " + Util.getHexString(this.icCode) + "\n");
+            sb.append("   ROM種別: " + Util.getHexString(this.icCode, 0, 1) + "\n");
+            sb.append("   IC 種別: " + Util.getHexString(this.icCode, 1, 1) + "\n");
             sb.append("\n");
             sb.append(" 最大応答時間パラメタ(6byte)\n");
-            sb.append("  B3(request service):" + getBinString(this.maximumResponseTime, 0, 1) + "\n");
-            sb.append("  B4(request response):" + getBinString(this.maximumResponseTime, 1, 1) + "\n");
-            sb.append("  B5(authenticate):" + getBinString(this.maximumResponseTime, 2, 1) + "\n");
-            sb.append("  B6(read):" + getBinString(this.maximumResponseTime, 3, 1) + "\n");
-            sb.append("  B7(write):" + getBinString(this.maximumResponseTime, 4, 1) + "\n");
-            sb.append("  B8():" + getBinString(this.maximumResponseTime, 5, 1) + "\n");
+            sb.append("  B3(request service):" + Util.getBinString(this.maximumResponseTime, 0, 1) + "\n");
+            sb.append("  B4(request response):" + Util.getBinString(this.maximumResponseTime, 1, 1) + "\n");
+            sb.append("  B5(authenticate):" + Util.getBinString(this.maximumResponseTime, 2, 1) + "\n");
+            sb.append("  B6(read):" + Util.getBinString(this.maximumResponseTime, 3, 1) + "\n");
+            sb.append("  B7(write):" + Util.getBinString(this.maximumResponseTime, 4, 1) + "\n");
+            sb.append("  B8():" + Util.getBinString(this.maximumResponseTime, 5, 1) + "\n");
             return sb.toString();
         }
     }
@@ -431,7 +431,7 @@ public class FeliCaLib {
         @Override
         public String toString() {
             StringBuilder sb = new StringBuilder();
-            sb.append("システムコード : " + getHexString(this.systemCode) + "\n");
+            sb.append("システムコード : " + Util.getHexString(this.systemCode) + "\n");
             return sb.toString();
         }
     }
@@ -465,7 +465,7 @@ public class FeliCaLib {
          @Override
          public String toString() {
              StringBuilder sb = new StringBuilder();
-             sb.append("サービスコード : " + getHexString(this.serviceCode) + "\n");
+             sb.append("サービスコード : " + Util.getHexString(this.serviceCode) + "\n");
              return sb.toString();
          }
      }
@@ -557,7 +557,7 @@ public class FeliCaLib {
         @Override
         public String toString() {
             StringBuilder sb = new StringBuilder();
-            sb.append("データ : " + getHexString(this.data) + "\n");
+            sb.append("データ : " + Util.getHexString(this.data) + "\n");
             return sb.toString();
         }   }
     
@@ -621,9 +621,9 @@ public class FeliCaLib {
             StringBuilder sb = new StringBuilder();
             sb.append("ブロックリストエレメント\n");
             sb.append("  データ長 : " + this.getBytes().length + " byte\n");
-            sb.append("  アクセスモード        : " + getBinString((byte)(this.lengthAndaccessMode & 0x8F)) + "\n");
-            sb.append("  サービスコードリスト順: " + getHexString(this.serviceCodeListOrder) + "\n");
-            sb.append("  ブロックナンバー      : " + getHexString(this.blockNumber) + "\n");
+            sb.append("  アクセスモード        : " + Util.getBinString((byte)(this.lengthAndaccessMode & 0x8F)) + "\n");
+            sb.append("  サービスコードリスト順: " + Util.getHexString(this.serviceCodeListOrder) + "\n");
+            sb.append("  ブロックナンバー      : " + Util.getHexString(this.blockNumber) + "\n");
             return sb.toString();
         }   
     }
@@ -674,10 +674,10 @@ public class FeliCaLib {
             //INfcTag#transceive
             Method transeive = tagService.getClass().getMethod("transceive", Integer.TYPE, byte[].class);
 
-            //Log.d(TAG, "invoking transceive commandPacket :" +  getHexString(commandPacket) + "\n");
+            //Log.d(TAG, "invoking transceive commandPacket :" +  Util.getHexString(commandPacket) + "\n");
             byte[] response = (byte[])transeive.invoke(tagService, serviceHandle, commandPacket);
             if ( response != null ) {
-                //Log.d(TAG, "transceive successful. commandResponse = " + getHexString(response) + "\n");
+                //Log.d(TAG, "transceive successful. commandResponse = " + Util.getHexString(response) + "\n");
             } else {
                 Log.d(TAG, "transceive fail. result null");
                 throw new FeliCaException("execute transceive fail" + "\n");
@@ -700,66 +700,5 @@ public class FeliCaLib {
         }
     }
    
-    /**
-     * byte配列を16進数文字列で戻します
-     * 
-     * @param data データをセット 
-     * @return 文字列が戻ります
-     */
-    public static String getHexString(byte data) {
-        return getHexString(new byte[]{data});
-    }
-    /**
-     * byte配列を16進数文字列で戻します
-     * 
-     * @param byteArray byte配列をセット 
-     * @return 文字列が戻ります
-     */
-    public static String getHexString(byte[] byteArray, int... split) {
-        StringBuilder builder = new StringBuilder();
-        byte[] target = null;
-        if ( split.length <= 1 ) {
-            target = byteArray;
-        } else  if ( split.length < 2 ) {
-            target = Arrays.copyOfRange(byteArray, 0, 0 + split[0]);
-        } else {
-            target = Arrays.copyOfRange(byteArray, split[0], split[0] + split[1]);
-        }
-        for (byte b : target) {
-            builder.append(String.format("%02x", b).toUpperCase());
-        }
-        return builder.toString();
-    }
-    /**
-     * byte配列を2進数文字列で戻します
-     * 
-     * @param data byteデータをセット 
-     * @return 文字列が戻ります
-     */
-    public static String getBinString(byte data) {
-        return getBinString(new byte[]{data});
-    }   
-    /**
-     * byte配列を2進数文字列で戻します
-     * 
-     * @param byteArray byte配列をセット 
-     * @return 文字列が戻ります
-     */
-    public static String getBinString(byte[] byteArray, int... split) {
-        StringBuilder builder = new StringBuilder();
-        byte[] target = null;
-        if ( split.length <= 1 ) {
-            target = byteArray;
-        } else  if ( split.length < 2 ) {
-            target = Arrays.copyOfRange(byteArray, 0, 0 + split[0]);
-        } else {
-            target = Arrays.copyOfRange(byteArray, split[0], split[0] + split[1]);
-        }
-        
-        for (byte b : target) {
-            builder.append(String.format("%8s"
-                    , Integer.toBinaryString(b & 0xFF)).replaceAll(" ", "0"));
-        }
-        return builder.toString();
-    }
+
 }

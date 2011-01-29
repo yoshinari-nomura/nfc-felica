@@ -12,8 +12,7 @@
   android:id="@+id/result_tv"
   android:layout_width="fill_parent"
   android:layout_height="wrap_content"
-  android:text="@string/hello_tag"
- ></TextView>
+  android:text="@string/hello_tag" android:textSize="20sp"></TextView>
 
  </ScrollView>
  <LinearLayout

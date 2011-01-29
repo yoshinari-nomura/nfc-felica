@@ -23,6 +23,7 @@ import net.kazzz.felica.lib.FeliCaLib;
 import net.kazzz.felica.lib.FeliCaLib.CommandPacket;
 import net.kazzz.felica.lib.FeliCaLib.CommandResponse;
 import net.kazzz.felica.lib.FeliCaLib.IDm;
+import net.kazzz.felica.suica.Suica;
 import android.app.Activity;
 import android.content.Intent;
 import android.nfc.NfcAdapter;
@@ -47,13 +48,23 @@ public class NFCFeliCaReader extends Activity implements OnClickListener {
     private String TAG = "NFCFelicaTagReader";
 
     private Parcelable nfcTag;
-    private IDm idm;
+    //private IDm idm;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
         TextView tv_tag = (TextView) findViewById(R.id.result_tv);
+        
+        Button btnRead = (Button) findViewById(R.id.btn_read);
+        btnRead.setOnClickListener(this);
+        
+        Button btnHistory = (Button) findViewById(R.id.brn_hitory);
+        btnHistory.setOnClickListener(this);
+        
+        Button btnInout = (Button) findViewById(R.id.btn_inout);
+        btnInout.setOnClickListener(this);
+        btnInout.setEnabled(false);
 
         Intent intent = this.getIntent();
         String action = intent.getAction();
@@ -70,13 +81,12 @@ public class NFCFeliCaReader extends Activity implements OnClickListener {
             }
         }
         
+        btnHistory.setEnabled(this.nfcTag != null);
+        
         //IDm退避
-        idm = new IDm(intent.getByteArrayExtra(NfcAdapter.EXTRA_ID));
+        //idm = new IDm(intent.getByteArrayExtra(NfcAdapter.EXTRA_ID));
         
         
-        ((Button) findViewById(R.id.btn_read)).setOnClickListener(this);
-        ((Button) findViewById(R.id.brn_hitory)).setOnClickListener(this);
-        ((Button) findViewById(R.id.btn_inout)).setOnClickListener(this);
     }
 
    
@@ -125,16 +135,34 @@ public class NFCFeliCaReader extends Activity implements OnClickListener {
      * @return
      */
     protected String readHistoryData() throws Exception {
+        
         try {
             FeliCa f = new FeliCa(this.nfcTag);
             
             //polling は IDm、PMmを取得するのに必要
             f.polling(FeliCa.SYSTEMCODE_PASMO);
+
             //read
-            byte[] result = f.readWithoutEncryption(FeliCa.SERVICE_SUICA_HISTORY, (byte)0);
+            byte addr = 0;
+            byte[] result = f.readWithoutEncryption(FeliCa.SERVICE_SUICA_HISTORY, addr);
             
-            String str = FeliCaLib.getHexString(result);
-            Log.d(TAG, "FeliCa#readWithoutEncryption = " + str);
+            StringBuilder sb = new StringBuilder();
+            while ( result != null ) {
+                sb.append("履歴 No.  " + (addr + 1) + "\n");
+                sb.append("---------\n");
+                sb.append("\n");
+                Suica.History s = new Suica.History(result, this);
+                sb.append(s.toString());
+                sb.append("---------------------------------------\n");
+                sb.append("\n");
+                
+                addr++;
+                Log.d(TAG, "addr = " + addr);
+                result = f.readWithoutEncryption(FeliCa.SERVICE_SUICA_HISTORY, addr);
+            }
+            
+            String str = sb.toString();
+            Log.d(TAG, str);
             return str;
         } catch (FeliCaException e) {
             e.printStackTrace();

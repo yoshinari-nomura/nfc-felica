@@ -15,6 +15,7 @@ import java.util.Arrays;
 
 import net.kazzz.felica.lib.FeliCaLib;
 import net.kazzz.felica.lib.FeliCaLib.CommandResponse;
+import net.kazzz.felica.lib.Util;
 
 /**
  * Read コマンドのレスポンスを抽象化したクラスを提供します
@@ -28,6 +29,7 @@ import net.kazzz.felica.lib.FeliCaLib.CommandResponse;
 public class ReadResponse extends CommandResponse {
     final int statusFlag1; 
     final int statusFlag2;
+    final int blockCount;
     final byte[] blockData; 
     /**
      * コンストラクタ
@@ -38,7 +40,13 @@ public class ReadResponse extends CommandResponse {
         super(response);
         this.statusFlag1 = this.data[0];
         this.statusFlag2 = this.data[1];
-        this.blockData = Arrays.copyOfRange(this.data, 2, data.length);
+        if ( this.getStatusFlag1() == 0 ) {
+            this.blockCount  = this.data[2];
+            this.blockData = Arrays.copyOfRange(this.data, 3, data.length);
+        } else {
+            this.blockCount  = 0;
+            this.blockData = null;
+        }
     }
     
     /**
@@ -65,6 +73,14 @@ public class ReadResponse extends CommandResponse {
         return this.blockData;
     }
 
+    /**
+     * blockCountを取得します
+     * @return int blockCountが戻ります
+     */
+    public int getBlockCount() {
+        return this.blockCount;
+    }
+
     /* (non-Javadoc)
      * @see java.lang.Object#toString()
      */
@@ -73,14 +89,14 @@ public class ReadResponse extends CommandResponse {
         StringBuilder sb = new StringBuilder();
         sb.append("FeliCa レスポンス　パケット \n");
         sb.append(" コマンド名 :" + FeliCaLib.commandMap.get(this.responseCode)  +  "\n");
-        sb.append(" データ長 : " + FeliCaLib.getHexString(this.length) + "\n");
-        sb.append(" コマンドコード : " + FeliCaLib.getHexString(this.responseCode) +  "\n");
+        sb.append(" データ長 : " + Util.getHexString(this.length) + "\n");
+        sb.append(" コマンドコード : " + Util.getHexString(this.responseCode) +  "\n");
         if ( this.idm != null )
             sb.append(" " + this.idm.toString() + "\n");
-        sb.append(" ステータスフラグ1 : " + FeliCaLib.getHexString((byte)(this.statusFlag1 & 0xff)) +  "\n");
-        sb.append(" ステータスフラグ2 : " + FeliCaLib.getHexString((byte)(this.statusFlag2 & 0xff)) +  "\n");
+        sb.append(" ステータスフラグ1 : " + Util.getHexString((byte)(this.statusFlag1 & 0xff)) +  "\n");
+        sb.append(" ステータスフラグ2 : " + Util.getHexString((byte)(this.statusFlag2 & 0xff)) +  "\n");
         if ( this.blockData != null )
-            sb.append(" ブロックデータ:  " + FeliCaLib.getHexString(this.blockData) + "\n");
+            sb.append(" ブロックデータ:  " + Util.getHexString(this.blockData) + "\n");
         return sb.toString();
     }
 }
