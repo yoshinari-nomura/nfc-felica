@@ -19,6 +19,7 @@ import java.nio.ByteBuffer;
 
 import net.kazzz.felica.command.PollingResponse;
 import net.kazzz.felica.command.ReadResponse;
+import net.kazzz.felica.lib.FeliCaException;
 import net.kazzz.felica.lib.FeliCaLib;
 import net.kazzz.felica.lib.FeliCaLib.CommandPacket;
 import net.kazzz.felica.lib.FeliCaLib.CommandResponse;

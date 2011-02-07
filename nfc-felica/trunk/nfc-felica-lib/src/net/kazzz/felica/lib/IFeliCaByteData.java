@@ -9,7 +9,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package net.kazzz.felica;
+package net.kazzz.felica.lib;
 
 /**
  * FeliCaで使用するバイトデータを抽象化したインタフェース

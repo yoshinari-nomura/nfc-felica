@@ -9,7 +9,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package net.kazzz.felica;
+package net.kazzz.felica.lib;
 
 /**
  * FeliCa 例外クラスを提供します
