@@ -19,6 +19,8 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
+import net.kazzz.felica.FeliCaException;
+import net.kazzz.felica.IFeliCaByteData;
 import net.kazzz.felica.command.IFeliCaCommand;
 import android.nfc.NfcAdapter;
 import android.os.Parcelable;

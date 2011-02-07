@@ -11,7 +11,6 @@
  */
 package net.kazzz.felica;
 
-import net.kazzz.felica.lib.FeliCaException;
 import net.kazzz.felica.lib.FeliCaLib.IDm;
 import net.kazzz.felica.lib.FeliCaLib.PMm;
 
