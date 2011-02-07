@@ -11,18 +11,17 @@
  */
 package net.kazzz.felica.suica;
 
-import static net.kazzz.felica.lib.DBUtil.COLUMNS_IRUCA_STATIONCODE;
-import static net.kazzz.felica.lib.DBUtil.COLUMNS_STATIONCODE;
-import static net.kazzz.felica.lib.DBUtil.COLUMN_ID;
-import static net.kazzz.felica.lib.DBUtil.TABLE_IRUCA_STATIONCODE;
-import static net.kazzz.felica.lib.DBUtil.TABLE_STATIONCODE;
+import static net.kazzz.felica.suica.DBUtil.COLUMNS_IRUCA_STATIONCODE;
+import static net.kazzz.felica.suica.DBUtil.COLUMNS_STATIONCODE;
+import static net.kazzz.felica.suica.DBUtil.COLUMN_ID;
+import static net.kazzz.felica.suica.DBUtil.TABLE_IRUCA_STATIONCODE;
+import static net.kazzz.felica.suica.DBUtil.TABLE_STATIONCODE;
 
 import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 
-import net.kazzz.felica.lib.DBUtil;
 import net.kazzz.felica.lib.Util;
 import android.content.Context;
 import android.database.Cursor;
@@ -30,11 +29,11 @@ import android.database.sqlite.SQLiteDatabase;
 
 /**
  * Suica(PASMO)データ抽象化したクラスを提供します
- * 
+ *
  * <pre>Suica/Pasmoのデータに関してはFeliCa Library - http://sourceforge.jp/projects/felicalib/wiki/suica </pre>
  * <pre>駅コードに関してはサイバネ駅コードデータベース - http://www.denno.net/SFCardFan/</pre>
  * <pre>これらを参考にさせて頂いております</pre>
- * 
+ *
  * @author Kazzz
  * @date 2011/01/24
  * @since Android API Level 9
@@ -44,7 +43,7 @@ import android.database.sqlite.SQLiteDatabase;
 public class Suica {
     /**
      * 使用履歴を抽象化したクラスを提供します
-     * 
+     *
      * @author Kazzz
      * @date 2011/01/24
      * @since Android API Level 9
@@ -52,7 +51,7 @@ public class Suica {
      */
     public static class History {
         final byte[] data;
-        Context context;  
+        Context context;
         /**
          * コンストラクタ
          * @param data データのバイト列(16バイト)をセット
@@ -85,7 +84,7 @@ public class Suica {
         }
         /**
          * 処理日付(出場日付)を取得します
-         * @return byte[] 
+         * @return byte[]
          */
         public Date getProccessDate() {
             int date = Util.toInt(new byte[]{this.data[4], this.data[5]});
@@ -112,7 +111,7 @@ public class Suica {
         }
         /**
          * 入場駅を取得します
-         * @return String バスの場合、序数0に会社名、1停留所名が戻ります 
+         * @return String バスの場合、序数0に会社名、1停留所名が戻ります
          *  鉄道の場合、序数0に会社名、1に路線名、2に駅名が戻ります
          */
         public String[] getEntranceStation() {
@@ -131,7 +130,7 @@ public class Suica {
         }
         /**
          * 出場駅を取得します
-         * @return String バスの場合、序数0に会社名、1停留所名が戻ります 
+         * @return String バスの場合、序数0に会社名、1停留所名が戻ります
          *  鉄道の場合、序数0に会社名、1に路線名、2に駅名が戻ります (バスの場合入場と同じ値となります)
          */
         public String[] getExitStation() {
@@ -157,8 +156,8 @@ public class Suica {
          * @return 取得できた場合、序数0に会社名、1に路線名、2に駅名が戻ります
          */
         private String[] getStation(int regionCode, int lineCode, int statioCode) {
-            
-            int areaCode = regionCode & 0xff; 
+
+            int areaCode = regionCode & 0xff;
             DBUtil util = new DBUtil(this.context);
             try {
                 SQLiteDatabase db = util.openDataBase();
@@ -168,8 +167,8 @@ public class Suica {
                           + COLUMNS_STATIONCODE[1] + " = '" + (lineCode & 0xff) + "' and "
                           + COLUMNS_STATIONCODE[2] + " = '" + (statioCode & 0xff) + "'"
                         , null, null, null, COLUMN_ID);
-                
-                return ( c.moveToFirst() ) 
+
+                return ( c.moveToFirst() )
                     ?  new String[]{ c.getString(3), c.getString(4), c.getString(5)}
                     :  new String[]{"???", "???", "???"};
             } catch (Exception e) {
@@ -195,7 +194,7 @@ public class Suica {
                         ,   COLUMNS_IRUCA_STATIONCODE[0] + " = '" + lineCode + "' and "
                           + COLUMNS_IRUCA_STATIONCODE[1] + " = '" + statioCode + "'"
                         , null, null, null, COLUMN_ID);
-                return ( c.moveToFirst()  ) 
+                return ( c.moveToFirst()  )
                     ?  new String[]{c.getString(2), c.getString(4)}
                     :  new String[]{"???", "???"};
             } catch (Exception e) {
@@ -205,7 +204,7 @@ public class Suica {
                 util.close();
             }
         }
- 
+
         /**
          * 処理種別がバス利用か否かを検査します
          * <pre>http://sourceforge.jp/projects/felicalib/wiki/suicaを参考にしています</pre>
@@ -216,7 +215,7 @@ public class Suica {
             return (this.data[0] & 0xff) == 0x05;
         }
         /**
-         *　端末種別が「物販」か否かを判定します 
+         *　端末種別が「物販」か否かを判定します
          * <pre>http://sourceforge.jp/projects/felicalib/wiki/suicaを参考にしています</pre>
          * @return boolean 物販だった場合はtrueが戻ります
          */
@@ -231,9 +230,9 @@ public class Suica {
          * @return boolean チャージだった場合はtrueが戻ります
          */
         public boolean isCharge() {
-            return ( this.data[1] & 0xff) == 0x02; 
+            return ( this.data[1] & 0xff) == 0x02;
         }
-        
+
         /* (non-Javadoc)
          * @see java.lang.Object#toString()
          */
@@ -243,7 +242,7 @@ public class Suica {
             nf.setMaximumFractionDigits(0);
             SimpleDateFormat dfl = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
             SimpleDateFormat dfs = new SimpleDateFormat("yyyy/MM/dd");
-            
+
             StringBuilder sb = new StringBuilder();
             sb.append("機器種別: " + this.getConsoleType() + "\n");
             sb.append("処理種別: " + this.getProcessType() + "\n");
@@ -256,12 +255,12 @@ public class Suica {
                 } else {
                     String[] entranceInfo = this.getEntranceStation();
                     String[] exitInfo = this.getExitStation();
-                    
+
                     sb.append("入場: " + "\n");
                     sb.append("  利用会社: " + entranceInfo[0]+ "\n");
                     sb.append("  路線名: " + entranceInfo[1]+ "線\n");
                     sb.append("  駅名: " + entranceInfo[2] + "\n");
-                    
+
                     if ( !this.isCharge()) {
                         sb.append("出場: " + "\n");
                         sb.append("  利用会社: " + exitInfo[0]+ "\n");
@@ -276,9 +275,9 @@ public class Suica {
             sb.append("残高: " + nf.format(this.getBalance()) + "\n");
             return sb.toString();
        }
-        
-        
-        
+
+
+
     }
     /**
      * 機器種別を取得します
@@ -337,7 +336,7 @@ public class Suica {
             case 0x13: return "支払(新幹線利用)";
             case 0x14: return "入A(入場時オートチャージ)";
             case 0x15: return "出A(出場時オートチャージ)";
-            case 0x1f: return "入金(バスチャージ)";            //byBus 
+            case 0x1f: return "入金(バスチャージ)";            //byBus
             case 0x23: return "券購 (バス路面電車企画券購入)";  //byBus
             case 0x46: return "物販";                 //sales
             case 0x48: return "特典(特典チャージ)";

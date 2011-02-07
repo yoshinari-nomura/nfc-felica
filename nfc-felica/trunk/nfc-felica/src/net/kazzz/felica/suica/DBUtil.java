@@ -9,7 +9,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package net.kazzz.felica.lib;
+package net.kazzz.felica.suica;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -24,7 +24,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 
 /**
  * 駅名、停留所を取得するためのDBユーティリティクラスを提供します
- * 
+ *
  * @author Kazzz
  * @date 2011/01/28
  * @since Android API Level 4
@@ -34,21 +34,21 @@ import android.database.sqlite.SQLiteOpenHelper;
 public class DBUtil extends SQLiteOpenHelper {
     public static final String COLUMN_ID = "_id";
     public static final String TABLE_STATIONCODE = "StationCode";
-    public static final String[] COLUMNS_STATIONCODE = 
+    public static final String[] COLUMNS_STATIONCODE =
         {"AreaCode", "LineCode", "StationCode", "CompanyName", "LineName", "StationName"};
-    
+
     public static final String TABLE_IRUCA_STATIONCODE = "StationCode.IruCaStationCode";
-    public static final String[] COLUMNS_IRUCA_STATIONCODE = 
+    public static final String[] COLUMNS_IRUCA_STATIONCODE =
         {"LineCode", "StationCode", "CompanyName", "LineName", "StationName"};
-    
+
     //The Android's default system path of your application database.
     private static final String DB_PATH = "/data/data/net.kazzz/databases/";
- 
+
     private static final String DB_NAME = "StationCode.db";
- 
-    private SQLiteDatabase dataBase; 
- 
-    private final Context context;   
+
+    private SQLiteDatabase dataBase;
+
+    private final Context context;
     /**
      * コンストラクタ
      * @param context コンテキストをセット
@@ -62,23 +62,23 @@ public class DBUtil extends SQLiteOpenHelper {
      * @throws IOException
      */
     public void createDataBase() throws IOException{
-        
+
         boolean dbExist = this.isExsistDataBase();
- 
+
         if (dbExist) {
             //DBはコピー済み
         } else {
             //Readonlyで開く
             this.getReadableDatabase();
- 
+
             try {
                 this.copyDataBase();
             } catch (IOException e) {
                 throw new Error("Error copying database");
- 
+
             }
         }
- 
+
     }
 
     /**
@@ -86,22 +86,22 @@ public class DBUtil extends SQLiteOpenHelper {
      * @return /data/data/パッケージ/に既にDBが存在している場合はtrueが戻ります
      */
     private boolean isExsistDataBase(){
- 
+
         SQLiteDatabase checkDB = null;
- 
+
         try{
             String path = DB_PATH + DB_NAME;
             checkDB = SQLiteDatabase.openDatabase(
                     path, null, SQLiteDatabase.OPEN_READONLY);
- 
+
         } catch ( SQLiteException e ){
             //database does't exist yet.
         }
- 
+
         if(checkDB != null){
             checkDB.close();
         }
- 
+
         return checkDB != null ? true : false;
     }
 
@@ -110,16 +110,16 @@ public class DBUtil extends SQLiteOpenHelper {
      * @throws IOException
      */
     private void copyDataBase() throws IOException{
- 
+
         //Open your local db as the input stream
         InputStream in = this.context.getAssets().open(DB_NAME);
- 
+
         // Path to the just created empty db
         String outFileName = DB_PATH + DB_NAME;
- 
+
         //Open the empty db as the output stream
         OutputStream out = new FileOutputStream(outFileName);
-        
+
         try {
             //transfer bytes from the inputfile to the outputfile
             byte[] buffer = new byte[1024];
@@ -137,18 +137,18 @@ public class DBUtil extends SQLiteOpenHelper {
      * データベースをオープンします
      * @return SQLiteDatabase データベースが戻ります
      * @throws SQLException
-     * @throws IOException 
+     * @throws IOException
      */
     public SQLiteDatabase openDataBase() throws SQLException, IOException{
         //必要ならAssetsからコピー
         this.createDataBase();
-        
+
         //Open the database
         String path = DB_PATH + DB_NAME;
         this.dataBase = SQLiteDatabase.openDatabase(
                 path, null, SQLiteDatabase.OPEN_READONLY);
         return this.dataBase;
- 
+
     }
     /**
      * データベースをクローズします
@@ -158,13 +158,13 @@ public class DBUtil extends SQLiteOpenHelper {
         if( this.dataBase != null )
             this.dataBase.close();
          super.close();
- 
+
     }
     @Override
     public void onCreate(SQLiteDatabase db) {
         //NOOP
     }
- 
+
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         //NOOP
