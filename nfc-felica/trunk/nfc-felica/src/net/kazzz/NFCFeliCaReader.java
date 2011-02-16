@@ -32,6 +32,7 @@ import android.os.Parcelable;
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.TextView;
 
@@ -53,6 +54,11 @@ public class NFCFeliCaReader extends Activity implements OnClickListener {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        
+        //IMEを自動起動しない
+        this.getWindow().setSoftInputMode(
+                WindowManager.LayoutParams.SOFT_INPUT_STATE_UNSPECIFIED);
+        
         setContentView(R.layout.main);
         TextView tv_tag = (TextView) findViewById(R.id.result_tv);
 
@@ -71,7 +77,7 @@ public class NFCFeliCaReader extends Activity implements OnClickListener {
 
         if (NfcAdapter.ACTION_TAG_DISCOVERED.equals(action)) {
             // android.nfc.extra.TAG 退避
-            this.nfcTag = intent.getParcelableExtra(NfcAdapter.EXTRA_TAG);
+            this.nfcTag = intent.getParcelableExtra("android.nfc.extra.TAG");
 
             FeliCaLib.IDm idm = new FeliCaLib.IDm(intent.getByteArrayExtra(NfcAdapter.EXTRA_ID));
             try {
