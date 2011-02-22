@@ -11,18 +11,15 @@
  */
 package net.kazzz;
 
-import static net.kazzz.felica.lib.FeliCaLib.COMMAND_POLLING;
-import static net.kazzz.felica.lib.FeliCaLib.COMMAND_READ_WO_ENCRYPTION;
-import static net.kazzz.felica.lib.FeliCaLib.COMMAND_REQUEST_SERVICE;
-import static net.kazzz.felica.lib.FeliCaLib.COMMAND_REQUEST_SYSTEMCODE;
-import static net.kazzz.felica.lib.FeliCaLib.COMMAND_SEARCH_SERVICECODE;
-import net.kazzz.felica.FeliCa;
 import net.kazzz.felica.FeliCaException;
-import net.kazzz.felica.command.PollingResponse;
+import net.kazzz.felica.FeliCaLiteTag;
+import net.kazzz.felica.FeliCaTag;
+import net.kazzz.felica.command.ReadResponse;
 import net.kazzz.felica.lib.FeliCaLib;
-import net.kazzz.felica.lib.FeliCaLib.CommandPacket;
-import net.kazzz.felica.lib.FeliCaLib.CommandResponse;
 import net.kazzz.felica.lib.FeliCaLib.IDm;
+import net.kazzz.felica.lib.FeliCaLib.MemoryConfigurationBlock;
+import net.kazzz.felica.lib.FeliCaLib.ServiceCode;
+import net.kazzz.felica.lib.FeliCaLib.SystemCode;
 import net.kazzz.felica.suica.Suica;
 import android.app.Activity;
 import android.content.Intent;
@@ -47,9 +44,9 @@ import android.widget.TextView;
 
 public class NFCFeliCaReader extends Activity implements OnClickListener {
     private String TAG = "NFCFelicaTagReader";
-
+    
     private Parcelable nfcTag;
-    //private IDm idm;
+    private boolean iSFeliCaLite;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -57,7 +54,7 @@ public class NFCFeliCaReader extends Activity implements OnClickListener {
         
         //IMEを自動起動しない
         this.getWindow().setSoftInputMode(
-                WindowManager.LayoutParams.SOFT_INPUT_STATE_UNSPECIFIED);
+                WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
         
         setContentView(R.layout.main);
         TextView tv_tag = (TextView) findViewById(R.id.result_tv);
@@ -65,8 +62,13 @@ public class NFCFeliCaReader extends Activity implements OnClickListener {
         Button btnRead = (Button) findViewById(R.id.btn_read);
         btnRead.setOnClickListener(this);
 
-        Button btnHistory = (Button) findViewById(R.id.brn_hitory);
+        Button btnHistory = (Button) findViewById(R.id.btn_hitory);
         btnHistory.setOnClickListener(this);
+        btnHistory.setEnabled(false);
+
+        Button btnWrite = (Button) findViewById(R.id.btn_write);
+        btnWrite.setOnClickListener(this);
+        btnWrite.setEnabled(false);
 
         Button btnInout = (Button) findViewById(R.id.btn_inout);
         btnInout.setOnClickListener(this);
@@ -79,25 +81,43 @@ public class NFCFeliCaReader extends Activity implements OnClickListener {
             // android.nfc.extra.TAG 退避
             this.nfcTag = intent.getParcelableExtra("android.nfc.extra.TAG");
 
-            FeliCaLib.IDm idm = new FeliCaLib.IDm(intent.getByteArrayExtra(NfcAdapter.EXTRA_ID));
             try {
+                FeliCaLib.IDm idm = 
+                    new FeliCaLib.IDm(intent.getByteArrayExtra(NfcAdapter.EXTRA_ID));
+
+                if ( idm == null ) {
+                    throw new FeliCaException("Felica IDm を取得できませんでした");
+                }
+                
+                this.iSFeliCaLite = this.iSFeliCaLite();
+                  
+                btnHistory.setEnabled(!this.iSFeliCaLite);
+                btnWrite.setEnabled(this.iSFeliCaLite);
+                
                 String data = readData();
-                tv_tag.setText(idm.toString() + data);
+                tv_tag.setText(data);
             } catch (Exception e) {
                 e.printStackTrace();
+                Log.e(TAG, e.toString());
             }
         }
-
-        btnHistory.setEnabled(this.nfcTag != null);
-
-        //IDm退避
-        //idm = new IDm(intent.getByteArrayExtra(NfcAdapter.EXTRA_ID));
-
-
+        btnHistory.setEnabled(!this.iSFeliCaLite);
+        btnWrite.setEnabled(this.iSFeliCaLite);
     }
 
-
-    public void onClick(View v) {
+    /**
+     * FeliCa Liteデバイスか否かを検査します
+     * @return boolean 読み込み対象がFeliCa Liteの場合trueが戻ります
+     * @throws FeliCaException
+     */
+    private boolean iSFeliCaLite() throws FeliCaException {
+        FeliCaTag f = new FeliCaTag(this.nfcTag);
+        //polling は IDm、PMmを取得するのに必要
+        IDm idm = f.pollingAndGetIDm(FeliCaLib.SYSTEMCODE_FELICA_LITE);
+        return idm != null;
+    }
+    
+    public void onClick(final View v) {
         try {
             switch (v.getId()) {
                 case R.id.btn_read:
@@ -114,7 +134,22 @@ public class NFCFeliCaReader extends Activity implements OnClickListener {
                     });
 
                     break;
-                case R.id.brn_hitory:
+                case R.id.btn_write:
+                    this.runOnUiThread(new Thread(){
+                        @Override
+                        public void run() {
+                            try {
+                                Intent intent = new Intent(NFCFeliCaReader.this, FeliCaLiteWriter.class);
+                                intent.putExtra("nfcTag", NFCFeliCaReader.this.nfcTag);
+                                startActivity(intent);
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    });
+
+                    break;
+                case R.id.btn_hitory:
                     this.runOnUiThread(new Thread(){
                         @Override
                         public void run() {
@@ -144,28 +179,29 @@ public class NFCFeliCaReader extends Activity implements OnClickListener {
     protected String readHistoryData() throws Exception {
 
         try {
-            FeliCa f = new FeliCa(this.nfcTag);
+            FeliCaTag f = new FeliCaTag(this.nfcTag);
 
             //polling は IDm、PMmを取得するのに必要
-            f.polling(FeliCa.SYSTEMCODE_PASMO);
+            f.polling(FeliCaLib.SYSTEMCODE_PASMO);
 
             //read
+            ServiceCode sc = new ServiceCode(FeliCaLib.SERVICE_SUICA_HISTORY);
             byte addr = 0;
-            byte[] result = f.readWithoutEncryption(FeliCa.SERVICE_SUICA_HISTORY, addr);
+            ReadResponse result = f.readWithoutEncryption(sc, addr);
 
             StringBuilder sb = new StringBuilder();
-            while ( result != null ) {
+            while ( result != null && result.getStatusFlag1() == 0  ) {
                 sb.append("履歴 No.  " + (addr + 1) + "\n");
                 sb.append("---------\n");
                 sb.append("\n");
-                Suica.History s = new Suica.History(result, this);
+                Suica.History s = new Suica.History(result.getBlockData(), this);
                 sb.append(s.toString());
                 sb.append("---------------------------------------\n");
                 sb.append("\n");
 
                 addr++;
-                Log.d(TAG, "addr = " + addr);
-                result = f.readWithoutEncryption(FeliCa.SERVICE_SUICA_HISTORY, addr);
+                //Log.d(TAG, "addr = " + addr);
+                result = f.readWithoutEncryption(sc, addr);
             }
 
             String str = sb.toString();
@@ -185,102 +221,77 @@ public class NFCFeliCaReader extends Activity implements OnClickListener {
      * @throws Exception
      */
     private String readData() throws Exception {
-        assert this.nfcTag != null;
-
         StringBuilder sb = new StringBuilder();
         try {
-            //polling data
-            CommandPacket polling =
-                new CommandPacket(COMMAND_POLLING
-                    , new byte[]{
-                          (byte)0x00, (byte)0x03 // FeliCaシステムコード
-                        , (byte)0x01             //　システムコードリクエスト
-                        , (byte)0x00});          // タイムスロット
-            sb.append(polling.toString());
-            CommandResponse r = FeliCaLib.execute(this.nfcTag, polling);
-            PollingResponse pr = new PollingResponse(r);
-            sb.append(pr.toString());
-            sb.append("\n");
-            sb.append("\n-----------------------------------------");
-            sb.append("\n");
+            
+            if ( this.iSFeliCaLite ) {
+                sb.append("\n");
+                sb.append("FeliCa Lite デバイスです ");
+                sb.append("\n----------------------------------------");
+                sb.append("\n");
+                // FeliCa Lite 読み込み
+                FeliCaLiteTag ft = new FeliCaLiteTag(this.nfcTag);
+                ft.polling();
+                sb.append("  " + ft.toString());
+                sb.append("\n----------------------------------------");
+                sb.append("\n");
+                
+                //0ブロック目読み込み
+                ReadResponse rr = ft.readWithoutEncryption((byte)0);
+                sb.append("  " + rr.toString());
+                sb.append("\n----------------------------------------");
+                sb.append("\n");
+                
+                //MemoryConfig 読み込み
+                MemoryConfigurationBlock mb = ft.getMemoryConfigBlock(); 
+                sb.append("  " + mb.toString());
+                sb.append("\n----------------------------------------");
+                sb.append("\n");
+                
+                String result = sb.toString();
+                Log.d(TAG, result);
+                return result;
+            }
+            
+            // FeliCa 
+            FeliCaTag ft = new FeliCaTag(this.nfcTag);
+            IDm idm = ft.pollingAndGetIDm(FeliCaLib.SYSTEMCODE_ANY);
+            if ( idm != null ) {
+                sb.append("\n");
+                sb.append("FeliCa デバイスです");
+                sb.append("\n-----------------------------------------");
+                sb.append("\n");
+                sb.append(ft.toString());
 
-            IDm idm = r.getIDm();
+                // enum systemCode
+                sb.append("\n");
+                sb.append("  システムコード一覧");
+                sb.append("\n  -----------------------------------------");
+                sb.append("\n");
+                SystemCode[] scs = ft.getSystemCodeList();
+                for ( SystemCode sc : scs ) {
+                    sb.append("  ").append(sc.toString()).append("\n");
+                }
 
-            //request systemCode
-            CommandPacket reqSystemCode =
-                new CommandPacket(COMMAND_REQUEST_SYSTEMCODE, idm);
-            sb.append(reqSystemCode.toString());
-            r = FeliCaLib.execute(this.nfcTag, reqSystemCode);
-            sb.append(r.toString());
-            sb.append("\n");
-            sb.append("\n-----------------------------------------");
-            sb.append("\n");
-
-            // search service code
-            CommandPacket searchServiceCode =
-                new CommandPacket(COMMAND_SEARCH_SERVICECODE, idm);
-
-            sb.append(searchServiceCode.toString());
-            r = FeliCaLib.execute(this.nfcTag, searchServiceCode);
-            sb.append(r.toString());
-            sb.append("\n");
-            sb.append("\n-----------------------------------------");
-            sb.append("\n");
-            // search service code
-            CommandPacket requestService =
-                new CommandPacket(COMMAND_REQUEST_SERVICE, idm
-                    , new byte[]{(byte) 0x01});
-            sb.append(requestService.toString());
-            r = FeliCaLib.execute(this.nfcTag, requestService);
-            sb.append(r.toString());
-            sb.append("\n");
-            sb.append("\n-----------------------------------------");
-            sb.append("\n");
-
-            // search read without encryption (利用履歴)
-            CommandPacket readWoEncrypt =
-                new CommandPacket(COMMAND_READ_WO_ENCRYPTION, idm
-                    , new byte[]{(byte) 0x01        // Number of Service
-                        , (byte) 0x0F, (byte) 0x09  // サービスコード(利用履歴)
-                        , (byte) 0x01               // 同時読み込みブロック数
-                        , (byte) 0x80, (byte) 0x00, (byte) 0x00 });// ブロックリスト
-            sb.append(readWoEncrypt.toString());
-            r = FeliCaLib.execute(this.nfcTag, readWoEncrypt);
-            sb.append(r.toString());
-            sb.append("\n");
-            sb.append("\n-----------------------------------------");
-            sb.append("\n");
-
-            // search read without encryption (入出場履歴)
-            /*
-            readWoEncrypt =
-                new CommandPacket(COMMAND_READ_WO_ENCRYPTION, idm
-                    , new byte[]{(byte) 0x01        // Number of Service
-                        , (byte) 0x8F, (byte) 0x10  // サービスコード(入出場履歴)
-                        , (byte) 0x01               // 同時読み込みブロック数
-                        , (byte) 0x00 });           // ブロックリスト
-
-            sb.append(readWoEncrypt.toString());
-            r = FeliCa.execute(this.nfcTag, readWoEncrypt);
-            sb.append(r.toString());
-            sb.append("\n");
-            sb.append("\n-----------------------------------------");
-            sb.append("\n");
-
-            // search read requestResponse
-            CommandPacket requestResponse = new CommandPacket(COMMAND_REQUEST_RESPONSE, idm);
-            sb.append(requestResponse.toString());
-            r = FeliCa.execute(this.nfcTag, requestResponse);
-            sb.append(r.toString());
-            sb.append("\n");
-            sb.append("\n------------------------------------------------");
-            sb.append("\n");
-            */
+                // enum serviceCode
+                sb.append("\n");
+                sb.append("  サービスコード一覧");
+                sb.append("\n-  ----------------------------------------");
+                sb.append("\n");
+                ServiceCode[] svs = ft.getServiceCodeList();
+                for ( ServiceCode sc : svs ) {
+                    sb.append("  ").append(sc.toString()).append("\n");
+                }
+            } else {
+                sb.append("デバイスの読み込みに失敗しました");
+            }
+            
         } catch (Exception e) {
+            String result = sb.toString();
+            Log.d(TAG, result);
             e.printStackTrace();
-            return "";
+            return result;
         }
-
         String result = sb.toString();
         Log.d(TAG, result);
         return result;
