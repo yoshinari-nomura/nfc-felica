@@ -11,47 +11,47 @@
  */
 package net.kazzz.felica.command;
 
-import java.util.Arrays;
-
 import net.kazzz.felica.lib.FeliCaLib;
 import net.kazzz.felica.lib.FeliCaLib.CommandResponse;
-import net.kazzz.felica.lib.FeliCaLib.PMm;
 import net.kazzz.felica.lib.Util;
 
 /**
- * Pollingコマンドのレスポンスを抽象化したクラスを提供します
+ * Write コマンドのレスポンスを抽象化したクラスを提供します
  * 
  * @author Kazzz
- * @date 2011/01/22
+ * @date 2011/02/21
  * @since Android API Level 9
  *
  */
 
-public class PollingResponse extends CommandResponse {
-    final PMm pmm; 
-    final byte[] requestData; 
+public class WriteResponse extends CommandResponse {
+    final int statusFlag1; 
+    final int statusFlag2;
     /**
      * コンストラクタ
      * 
      * @param data コマンド実行結果で戻ったバイト列をセット
      */
-    public PollingResponse(CommandResponse response) {
+    public WriteResponse(CommandResponse response) {
         super(response);
-        if ( this.data != null && this.data.length >= 8 ) {
-            this.pmm = new PMm(Arrays.copyOfRange(this.data, 0, 8));
-            this.requestData = Arrays.copyOfRange(this.data, 8, data.length);
-        } else {
-            this.pmm = null;
-            this.requestData = null;
-        }
+        this.statusFlag1 = this.data[0];
+        this.statusFlag2 = this.data[1];
     }
+    
     /**
-     * PMmを取得します
-     * 
-     * @return PMm pmmが戻ります
+     * statusFlag1を取得します
+     * @return int statusFlag1が戻ります
      */
-    public PMm getPMm() {
-        return this.pmm;
+    public int getStatusFlag1() {
+        return this.statusFlag1;
+    }
+
+    /**
+     * statusFlag2を取得します
+     * @return int statusFlag2が戻ります
+     */
+    public int getStatusFlag2() {
+        return this.statusFlag2;
     }
     /* (non-Javadoc)
      * @see java.lang.Object#toString()
@@ -59,15 +59,15 @@ public class PollingResponse extends CommandResponse {
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
-        sb.append("FeliCa レスポンス　パケット \n");
+        sb.append("FeliCa Write Response \n");
         sb.append(" コマンド名 :" + FeliCaLib.commandMap.get(this.responseCode)  +  "\n");
         sb.append(" データ長 : " + Util.getHexString(this.length) + "\n");
         sb.append(" コマンドコード : " + Util.getHexString(this.responseCode) +  "\n");
         if ( this.idm != null )
             sb.append(" " + this.idm.toString() + "\n");
-        if ( this.pmm != null )
-            sb.append(" " + this.pmm.toString() + "\n");
-        sb.append(" データ: " + Util.getHexString(this.data) + "\n");
+        sb.append(" ステータスフラグ1 : " + Util.getHexString((byte)(this.statusFlag1 & 0xff)) +  "\n");
+        sb.append(" ステータスフラグ2 : " + Util.getHexString((byte)(this.statusFlag2 & 0xff)) +  "\n");
         return sb.toString();
     }
 }
+
