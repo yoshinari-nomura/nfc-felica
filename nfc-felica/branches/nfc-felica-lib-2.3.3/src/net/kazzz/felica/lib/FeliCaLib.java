@@ -912,9 +912,7 @@ public final class FeliCaLib {
     /**
      * コマンドを実行します
      *
-     * <pre>Android 2.3の隠しクラス(@hide)に依存しています。今後の仕様変更で使えなくなるリスクを考慮してください</pre>
-     * 
-     * @param tag 隠しクラスである android.nfc.Tag クラスの参照をセットします
+     * @param Tag Tagクラスの参照をセットします
      * @param commandPacket 実行するコマンドパケットをセットします
      * @return CommandResponse コマンドの実行結果が戻ります 
      * @throws FeliCaException コマンドの発行に失敗した場合にスローされます
@@ -926,9 +924,7 @@ public final class FeliCaLib {
     /**
      * Rawデータを使ってコマンドを実行します
      * 
-     * <pre>Android 2.3の隠しクラス(@hide)に依存しています。今後の仕様変更で使えなくなるリスクを考慮してください</pre>
-     * 
-     * @param Tag 隠しクラスである android.nfc.Tag クラスの参照をセットします
+     * @param Tag Tagクラスの参照をセットします
      * @param data コマンドにセットするデータをセットします
      * @return byte[] コマンドの実行結果バイト列で戻ります 
      * @throws FeliCaException コマンドの発行に失敗した場合にスローされます
@@ -943,7 +939,7 @@ public final class FeliCaLib {
     /**
      * INfcTag#transceiveを実行します
      * 
-     * @param Tag 隠しクラスである android.nfc.Tag クラスの参照をセットします
+     * @param Tag Tagクラスの参照をセットします
      * @param commandPacket 実行するコマンドパケットをセットします
      * @return byte[] コマンドの実行結果バイト列で戻ります 
      * @throws FeliCaException コマンドの発行に失敗した場合にスローされます
