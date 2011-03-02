@@ -45,8 +45,8 @@ import android.widget.Toast;
  * FeliCa Liteのデータを書きこむためのライタークラスのサンプル実装を提供します
  *
  * @author Kazzz
- * @date 2011/01/21
- * @since Android API Level 9
+ * @date 2011/03/01
+ * @since Android API Level 10
  *
  */
 
