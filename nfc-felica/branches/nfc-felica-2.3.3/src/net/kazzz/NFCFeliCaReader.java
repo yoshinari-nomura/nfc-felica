@@ -43,7 +43,7 @@ import android.widget.TextView;
  * FeliCa又はFeliCa Lite PICCのデータを読みこむリーダークラスのサンプル実装を提供します
  *
  * @author Kazzz
- * @date 2011/01/21
+ * @date 2011/03/01
  * @since Android API Level 10
  *
  */
