@@ -25,11 +25,11 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 /**
- * FeliCaカードにアクセスするためのデータと操作をライブラリィとして提供します
+ * FeliCa、FeliCa Liteデバイスにアクセスするためのコマンドとデータ操作をライブラリィとして提供します
  * 
  * <pre>
  * ※ 「FeliCa」は、ソニー株式会社が開発した非接触ICカードの技術方式です。
- * ※ 「FeliCa」、「FeliCaポケット」、「FeliCaランチャー」は、ソニー株式会社の登録商標です。
+ * ※ 「FeliCa」、「FeliCa Lite」、「FeliCa Plug」、「FeliCaポケット」、「FeliCaランチャー」は、ソニー株式会社の登録商標です。
  * ※ 「Suica」は東日本旅客鉄道株式会社の登録商標です。
  * ※ 「PASMO」は、株式会社パスモの登録商標です。
  * 
@@ -37,7 +37,7 @@ import android.os.Parcelable;
  * </pre>
  * 
  * @author Kazzz
- * @date 2011/01/16
+ * @date 2011/03/04
  * @since Android API Level 9
  *
  */
@@ -171,7 +171,7 @@ public final class FeliCaLib {
      * @since Android API Level 9
      */
     public static class CommandPacket implements IFeliCaCommand {
-        protected final byte length;     //全体のデータ長 
+        protected final int length;     //コマンド全体のデータ長 
         protected final byte commandCode;//コマンドコード
         protected final IDm  idm;        //FeliCa IDm
         protected final byte[] data;     //コマンドデータ
@@ -209,7 +209,10 @@ public final class FeliCaLib {
                 this.idm = null;
                 this.data = Arrays.copyOfRange(data, 0, data.length);
             }
-            this.length = (byte)(data.length + 2);
+            this.length = data.length + 2;
+            
+            if ( this.length > 255 )
+                throw new FeliCaException("command data too long (least 255byte)");        
         }
         /**
          * コンストラクタ
@@ -225,7 +228,9 @@ public final class FeliCaLib {
             this.commandCode = commandCode;
             this.idm = idm;
             this.data = data;
-            this.length = (byte)(idm.getBytes().length + data.length + 2);
+            this.length = idm.getBytes().length + data.length + 2;
+            if ( this.length > 255 )
+                throw new FeliCaException("command data too long (least 255byte)");        
         }
         /**
          * コンストラクタ
@@ -241,7 +246,9 @@ public final class FeliCaLib {
             this.commandCode = commandCode;
             this.idm = new IDm(idm);
             this.data = data;
-            this.length = (byte)(idm.length + data.length + 2);
+            this.length = idm.length + data.length + 2;
+            if ( this.length > 255 )
+                throw new FeliCaException("command data too long (least 255byte)");        
         }
         
         /* (non-Javadoc)
@@ -257,10 +264,11 @@ public final class FeliCaLib {
          */
         public byte[] getBytes() {
             ByteBuffer buff = ByteBuffer.allocate(this.length);
+            byte length = (byte)this.length;
             if ( this.idm != null ) {
-                buff.put(this.length).put(this.commandCode).put(this.idm.getBytes()).put(this.data);
+                buff.put(length).put(this.commandCode).put(this.idm.getBytes()).put(this.data);
             } else {
-                buff.put(this.length).put(this.commandCode).put(this.data);
+                buff.put(length).put(this.commandCode).put(this.data);
             }
             return buff.array();
         }
@@ -272,7 +280,7 @@ public final class FeliCaLib {
            StringBuilder sb = new StringBuilder();
            sb.append("FeliCa コマンドパケット \n");
            sb.append(" コマンド名:" + commandMap.get(this.commandCode)  +  "\n");
-           sb.append(" データ長: " + Util.getHexString(this.length) + "\n");
+           sb.append(" データ長: " + Util.getHexString((byte)(this.length & 0xff)) + "\n");
            sb.append(" コマンドコード : " + Util.getHexString(this.commandCode) +  "\n");
            if ( this.idm != null )
                sb.append(" " + this.idm.toString() + "\n");
@@ -289,7 +297,7 @@ public final class FeliCaLib {
      */
     public static class CommandResponse implements IFeliCaCommand {
         protected final byte[] rawData;
-        protected final byte length;      //全体のデータ長 (FeliCaには無い)
+        protected final int length;      //全体のデータ長 (FeliCaには無い)
         protected final byte responseCode;//コマンドレスポンスコード)
         protected final IDm idm;          //FeliCa IDm
         protected final byte[] data;      //コマンドデータ
@@ -309,7 +317,7 @@ public final class FeliCaLib {
         public CommandResponse(byte[] data) {
             if ( data != null ) {
                 this.rawData = data;
-                this.length = data[0]; 
+                this.length = data[0] & 0xff; 
                 this.responseCode = data[1];
                 this.idm = new IDm(Arrays.copyOfRange(data, 2, 10));
                 this.data = Arrays.copyOfRange(data, 10, data.length);
@@ -344,7 +352,7 @@ public final class FeliCaLib {
            sb.append(" \n\n");
            sb.append("FeliCa レスポンスパケット \n");
            sb.append(" コマンド名:" + commandMap.get(this.responseCode)  +  "\n");
-           sb.append(" データ長: " + Util.getHexString(this.length) + "\n");
+           sb.append(" データ長: " + Util.getHexString((byte)(this.length & 0xff)) + "\n");
            sb.append(" レスポンスコード: " + Util.getHexString(this.responseCode) + "\n");
            sb.append(" "+ this.idm.toString() + "\n");
            sb.append(" データ: " + Util.getHexString(this.data) + "\n");
