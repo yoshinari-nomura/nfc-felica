@@ -215,7 +215,7 @@ public final class FeliCaLib {
             this.length = data.length + 2;
             
             if ( this.length > 255 )
-                throw new FeliCaException("command data too long (least 255byte)");        
+                throw new FeliCaException("command data too long (less than 255Byte)");        
         }
         /**
          * コンストラクタ
@@ -233,7 +233,7 @@ public final class FeliCaLib {
             this.data = data;
             this.length = idm.getBytes().length + data.length + 2;
             if ( this.length > 255 )
-                throw new FeliCaException("command data too long (least 255byte)");        
+                throw new FeliCaException("command data too long (less than 255byte)");        
         }
         /**
          * コンストラクタ
@@ -251,7 +251,7 @@ public final class FeliCaLib {
             this.data = data;
             this.length = idm.length + data.length + 2;
             if ( this.length > 255 )
-                throw new FeliCaException("command data too long (least 255byte)");        
+                throw new FeliCaException("command data too long (less than 255byte)");        
         }
         
         /* (non-Javadoc)
