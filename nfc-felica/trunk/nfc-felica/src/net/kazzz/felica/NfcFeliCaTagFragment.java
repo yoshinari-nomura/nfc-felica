@@ -28,7 +28,7 @@ import android.util.Log;
 /**
  * NfcでFeliCa(FeliCa Lite)Tagを読み込むためのフラグメントを提供します
  * 
- * @author Copyright c 2011-2012 All Rights Reserved.
+ * @author Kazzz.
  * @date 2011/06/24
  * @since Android API Level 9
  *
