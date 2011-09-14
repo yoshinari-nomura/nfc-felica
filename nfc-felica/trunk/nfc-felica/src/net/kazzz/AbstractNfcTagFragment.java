@@ -33,7 +33,7 @@ import android.util.Log;
 /**
  * NFCTagにアクセスするView無しフラグメントクラスのルートを提供します
  * 
- * @author Copyright c 2011-2012 All Rights Reserved.
+ * @author Kazzz.
  * @date 2011/07/09
  * @since Android API Level 10
  *

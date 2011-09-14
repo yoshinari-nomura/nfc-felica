@@ -29,7 +29,15 @@ import android.view.View.OnClickListener;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.TextView;
-
+/**
+ * 
+ * NFCTagReaderのサンプル実装を提供します
+ * 
+ * @author Kazzz.
+ * @date 2011/08/14
+ * @since Android API Level 10
+ *
+ */
 public class NFCTagReader extends FragmentActivity implements OnClickListener, INfcTagListener {
     private String TAG = "NFCTagReader";
     private AbstractNfcTagFragment mLastFragment;
