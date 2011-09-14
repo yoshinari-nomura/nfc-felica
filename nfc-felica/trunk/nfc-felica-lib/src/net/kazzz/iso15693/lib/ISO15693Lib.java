@@ -30,7 +30,7 @@ import android.os.Parcelable;
 /**
  * ISO15693 デバイスにアクセスするためのコマンドとデータ操作をライブラリィとして提供します
  * 
- * @author Copyright c 2011-2012 All Rights Reserved.
+ * @author Kazzz
  * @date 2011/07/11
  * @since Android API Level 10
  *

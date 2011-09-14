@@ -26,7 +26,7 @@ import android.os.Parcelable;
 /**
  * ReadMultipleBlockResponse実行時のレスポンスを抽象化したクラスを提供します
  * 
- * @author Copyright c 2011-2012 All Rights Reserved.
+ * @author Kazzz
  * @date 2011/07/13
  * @since Android API Level 10
  *

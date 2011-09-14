@@ -14,7 +14,7 @@ package net.kazzz.iso15693;
 /**
  * ISO15693で使用するバイトデータを抽象化したインタフェース
  * 
- * @author 
+ * @author Kazzz
  * @date 2011/01/21
  * @since Android API Level 10
  *
