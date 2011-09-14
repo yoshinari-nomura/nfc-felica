@@ -21,6 +21,7 @@ import net.kazzz.felica.FeliCaException;
 import net.kazzz.felica.IFeliCaByteData;
 import net.kazzz.felica.command.IFeliCaCommand;
 import net.kazzz.nfc.NfcException;
+import net.kazzz.util.Util;
 import android.nfc.Tag;
 import android.nfc.TagLostException;
 import android.nfc.tech.NfcF;

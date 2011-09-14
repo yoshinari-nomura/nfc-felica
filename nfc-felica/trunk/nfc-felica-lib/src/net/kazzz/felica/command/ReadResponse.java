@@ -15,7 +15,7 @@ import java.util.Arrays;
 
 import net.kazzz.felica.lib.FeliCaLib;
 import net.kazzz.felica.lib.FeliCaLib.CommandResponse;
-import net.kazzz.felica.lib.Util;
+import net.kazzz.util.Util;
 
 /**
  * Read コマンドのレスポンスを抽象化したクラスを提供します

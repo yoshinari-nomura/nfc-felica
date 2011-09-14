@@ -186,6 +186,27 @@ public final class ArrayUtil {
     public static final <T> boolean contains(T[] array, T obj) {
         return -1 < indexOf(array, obj);
     }
+    /**
+     * 配列にオブジェクトが含まれているかどうかを返します。
+     * 
+     * @param source 検査対象の配列をセット
+     * @param target 含まれている可能性のある配列をセット
+     * @return 配列にオブジェクトが含まれている場合はtrueが戻ります
+     */
+    public static <T> boolean containArray(T[] source, T[] target) {
+        if (target == null || target.length == 0) return false;
+
+        Arrays.sort(source);
+        Arrays.sort(target);
+        for (T tech : target) {
+            if (Arrays.binarySearch(source, tech) < 0) {
+                continue;
+            } else {
+                return true;
+            }
+        }
+        return false;
+    }
 
     /**
      * 文字列配列に文字列オブジェクトが含まれているかどうかを返します。(文字列のケースを比較しません)

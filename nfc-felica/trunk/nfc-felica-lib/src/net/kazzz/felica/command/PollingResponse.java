@@ -16,7 +16,7 @@ import java.util.Arrays;
 import net.kazzz.felica.lib.FeliCaLib;
 import net.kazzz.felica.lib.FeliCaLib.CommandResponse;
 import net.kazzz.felica.lib.FeliCaLib.PMm;
-import net.kazzz.felica.lib.Util;
+import net.kazzz.util.Util;
 
 /**
  * Pollingコマンドのレスポンスを抽象化したクラスを提供します
