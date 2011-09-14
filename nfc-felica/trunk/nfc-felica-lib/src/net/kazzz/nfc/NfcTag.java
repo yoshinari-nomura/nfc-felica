@@ -12,7 +12,7 @@
 
 package net.kazzz.nfc;
 
-import net.kazzz.felica.lib.Util;
+import net.kazzz.util.Util;
 import android.content.Intent;
 import android.os.Parcel;
 import android.os.Parcelable;

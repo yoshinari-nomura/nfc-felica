@@ -13,7 +13,7 @@ package net.kazzz.felica.command;
 
 import net.kazzz.felica.lib.FeliCaLib;
 import net.kazzz.felica.lib.FeliCaLib.CommandResponse;
-import net.kazzz.felica.lib.Util;
+import net.kazzz.util.Util;
 
 /**
  * Write コマンドのレスポンスを抽象化したクラスを提供します
