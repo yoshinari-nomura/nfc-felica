@@ -27,27 +27,11 @@
   android:orientation="vertical"
   android:id="@+id/pnl_uiBlock"
  >
-  <LinearLayout
-   android:layout_height="match_parent"
-   android:layout_width="fill_parent"
-   android:layout_weight="1"
-   android:id="@+id/pnl_writeblock2"
-  >
-   <EditText
-    android:hint="@string/hint_label"
-    android:id="@+id/edit_write"
-    android:layout_height="fill_parent"
-    android:layout_width="wrap_content"
-    android:layout_weight="1"
-   ></EditText>
-   <Button
-    android:layout_height="fill_parent"
-    android:layout_width="wrap_content"
-    android:text="@string/write_label"
-    android:layout_weight="0"
-    android:id="@+id/btn_write"
-   ></Button>
-  </LinearLayout>
+     <CheckBox android:layout_weight="1" android:layout_height="wrap_content" android:layout_width="wrap_content" android:id="@+id/chk_useNDEF" android:layout_gravity="right" android:text="書込みにNDEFを使用する"></CheckBox>
+     <LinearLayout android:id="@+id/pnl_writeblock2" android:layout_height="match_parent" android:layout_weight="1" android:layout_width="fill_parent">
+         <EditText android:layout_weight="1" android:id="@+id/edit_write" android:layout_height="fill_parent" android:hint="@string/hint_label" android:layout_width="wrap_content"></EditText>
+         <Button android:layout_weight="0" android:layout_height="fill_parent" android:text="@string/write_label" android:id="@+id/btn_write" android:layout_width="wrap_content"></Button>
+     </LinearLayout>
  </LinearLayout>
 
 </LinearLayout>
