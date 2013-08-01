@@ -32,7 +32,6 @@ import net.kazzz.felica.lib.FeliCaLib.IDm;
 import net.kazzz.felica.lib.FeliCaLib.PMm;
 import net.kazzz.felica.lib.FeliCaLib.ServiceCode;
 import net.kazzz.felica.lib.FeliCaLib.SystemCode;
-import net.kazzz.nfc.NfcException;
 import net.kazzz.nfc.NfcTag;
 import android.nfc.Tag;
 import android.os.Parcel;
@@ -166,13 +165,16 @@ public class FeliCaTag extends NfcTag {
      * SystemCodeの一覧を取得します。
      *
      * @return SystemCode[] 検出された SystemCodeの一覧を返します。
-     * @throws NfcException
+     * @throws FeliCaException
      */
     public final SystemCode[] getSystemCodeList() throws FeliCaException {
         //request systemCode
         CommandPacket reqSystemCode = new CommandPacket(COMMAND_REQUEST_SYSTEMCODE, idm);
         CommandResponse r = FeliCaLib.execute(this.nfcTag, reqSystemCode);
         byte[] retBytes = r.getBytes();
+        if(retBytes == null){
+            throw new FeliCaException("Tag Lost");
+        }
         int num = (int)retBytes[10];
         //Log.d(TAG, "Num SystemCode: " + num);
         SystemCode retCodeList[] = new SystemCode[num];
@@ -185,7 +187,7 @@ public class FeliCaTag extends NfcTag {
      * Polling済みシステム領域のサービスの一覧を取得します。
      *
      * @return ServiceCode[] 検出された ServiceCodeの配列
-     * @throws NfcException
+     * @throws FeliCaException
      */
     public ServiceCode[] getServiceCodeList() throws FeliCaException {
         int index = 1; // 0番目は root areaなので1オリジンで開始する
@@ -271,7 +273,7 @@ public class FeliCaTag extends NfcTag {
         CommandPacket writeWoEncrypt =
             new CommandPacket(COMMAND_WRITE_WO_ENCRYPTION, idm, b.array());
         CommandResponse r = FeliCaLib.execute(this.nfcTag, writeWoEncrypt);
-        return new WriteResponse(r);
+        return (r.getBytes() != null ? new WriteResponse(r) : null);
     }
     /* (non-Javadoc)
      * @see java.lang.Object#toString()
