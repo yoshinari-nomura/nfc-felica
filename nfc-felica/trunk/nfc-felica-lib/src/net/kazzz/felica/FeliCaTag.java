@@ -40,7 +40,7 @@ import android.os.Parcelable;
 
 /**
  * FeliCa仕様に準拠した FeliCaタグクラスを提供します
- * 
+ *
  * @author Kazzz
  * @date 2011/01/23
  * @since Android API Level 9
@@ -48,13 +48,13 @@ import android.os.Parcelable;
  */
 
 public class FeliCaTag extends NfcTag {
-    /** Parcelable need CREATOR field **/ 
-    public static final Parcelable.Creator<FeliCaTag> CREATOR = 
+    /** Parcelable need CREATOR field **/
+    public static final Parcelable.Creator<FeliCaTag> CREATOR =
         new Parcelable.Creator<FeliCaTag>() {
             public FeliCaTag createFromParcel(Parcel in) {
                 return new FeliCaTag(in);
             }
-            
+
             public FeliCaTag[] newArray(int size) {
                 return new FeliCaTag[size];
             }
@@ -72,7 +72,7 @@ public class FeliCaTag extends NfcTag {
     }
     /**
      * コンストラクタ
-     * 
+     *
      * @param nfcTag NFCTagへの参照をセット
      */
     public FeliCaTag(Parcelable nfcTag) {
@@ -80,7 +80,7 @@ public class FeliCaTag extends NfcTag {
     }
     /**
      * コンストラクタ
-     * 
+     *
      * @param nfcTag NFCTagへの参照をセット
      * @param idm FeliCa IDmをセット
      * @param pmm FeliCa PMmをセット
@@ -90,8 +90,8 @@ public class FeliCaTag extends NfcTag {
         this.idm = idm;
         this.pmm = pmm;
     }
-    
-    
+
+
     /* (non-Javadoc)
      * @see net.kazzz.nfc.NfcTag#writeToParcel(android.os.Parcel, int)
      */
@@ -113,8 +113,8 @@ public class FeliCaTag extends NfcTag {
     }
     /**
      * カードデータをポーリングします
-     * 
-     * @param systemCode 対象のシステムコードをセットします 
+     *
+     * @param systemCode 対象のシステムコードをセットします
      * @return　byte[] システムコードの配列が戻ります
      * @throws FeliCaException
      */
@@ -122,13 +122,13 @@ public class FeliCaTag extends NfcTag {
         if ( this.nfcTag == null ) {
             throw new FeliCaException("tagService is null. no polling execution");
         }
-        CommandPacket polling = 
+        CommandPacket polling =
             new CommandPacket(COMMAND_POLLING
                     , new byte[] {
                       (byte) (systemCode >> 8)  // システムコード
                     , (byte) (systemCode & 0xff)
                     , (byte) 0x01              //　システムコードリクエスト
-                    , (byte) 0x00});           // タイムスロット}; 
+                    , (byte) 0x00});           // タイムスロット};
         CommandResponse r = FeliCaLib.execute(this.nfcTag, polling);
         PollingResponse pr = new PollingResponse(r);
         this.idm = pr.getIDm();
@@ -137,8 +137,8 @@ public class FeliCaTag extends NfcTag {
     }
     /**
      * カードデータをポーリングしてIDmを取得します
-     * 
-     * @param systemCode 対象のシステムコードをセットします 
+     *
+     * @param systemCode 対象のシステムコードをセットします
      * @return　IDm IDmが戻ります
      * @throws FeliCaException
      */
@@ -164,12 +164,12 @@ public class FeliCaTag extends NfcTag {
     }
     /**
      * SystemCodeの一覧を取得します。
-     * 
+     *
      * @return SystemCode[] 検出された SystemCodeの一覧を返します。
      * @throws NfcException
      */
     public final SystemCode[] getSystemCodeList() throws FeliCaException {
-        //request systemCode 
+        //request systemCode
         CommandPacket reqSystemCode = new CommandPacket(COMMAND_REQUEST_SYSTEMCODE, idm);
         CommandResponse r = FeliCaLib.execute(this.nfcTag, reqSystemCode);
         byte[] retBytes = r.getBytes();
@@ -183,7 +183,7 @@ public class FeliCaTag extends NfcTag {
     }
     /**
      * Polling済みシステム領域のサービスの一覧を取得します。
-     * 
+     *
      * @return ServiceCode[] 検出された ServiceCodeの配列
      * @throws NfcException
      */
@@ -218,10 +218,10 @@ public class FeliCaTag extends NfcTag {
             throw new FeliCaException("ResponseCode is not 0x0b");
         }
         return Arrays.copyOfRange(bytes, 10, bytes.length);
-    }   
+    }
     /**
      * 認証不要領域のデータを読み込みます
-     * 
+     *
      * @param serviceCode サービスコードをセット
      * @param addr 読み込むブロックのアドレス (0オリジン)をセット
      * @return ReadResponse 読み込んだ結果が戻ります
@@ -234,7 +234,7 @@ public class FeliCaTag extends NfcTag {
         }
         // read without encryption
         byte[] bytes = serviceCode.getBytes();
-        CommandPacket readWoEncrypt = 
+        CommandPacket readWoEncrypt =
             new CommandPacket(COMMAND_READ_WO_ENCRYPTION, idm
                 ,  new byte[]{(byte) 0x01         // サービス数
                     , (byte) bytes[0]             // サービスコード (little endian)
@@ -242,11 +242,11 @@ public class FeliCaTag extends NfcTag {
                     , (byte) 0x01                 // 同時読み込みブロック数
                     , (byte) 0x80, addr });       // ブロックリスト
         CommandResponse r = FeliCaLib.execute(this.nfcTag, readWoEncrypt);
-        return new ReadResponse(r); 
+        return (r.getBytes()!=null ? new ReadResponse(r) : null);
     }
     /**
      * 認証不要領域のデータを書き込みます
-     * 
+     *
      * @param serviceCode サービスコードをセット
      * @param addr データをセットするブロックのアドレス(0オリジン)をセット
      * @param buff 書きこむデータをセット (16バイト)
@@ -268,7 +268,7 @@ public class FeliCaTag extends NfcTag {
                 , (byte) 0x80, (byte) addr       // ブロックリスト 0x80は (2バイトブロックエレメント+ランダムサービス)
                 });
         b.put(buff, 0, buff.length > 16 ? 16 : buff.length); //書き出すデータ  (一度につき16バイト)
-        CommandPacket writeWoEncrypt = 
+        CommandPacket writeWoEncrypt =
             new CommandPacket(COMMAND_WRITE_WO_ENCRYPTION, idm, b.array());
         CommandResponse r = FeliCaLib.execute(this.nfcTag, writeWoEncrypt);
         return new WriteResponse(r);
@@ -280,11 +280,11 @@ public class FeliCaTag extends NfcTag {
     public String toString() {
        StringBuilder sb = new StringBuilder();
        sb.append("FeliCaTag \n");
-       if ( this.idm != null ) 
+       if ( this.idm != null )
            sb.append(this.idm.toString()).append("\n");
-       if ( this.pmm != null ) 
+       if ( this.pmm != null )
            sb.append(this.pmm.toString()).append("\n");
        return sb.toString();
     }
-    
+
 }
